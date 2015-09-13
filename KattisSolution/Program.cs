@@ -58,31 +58,31 @@ namespace KattisSolution
 
             bool isSolutionOk = false;
 
-            for (int i = 0; i < a.Length; i++)
+            for (int i = 0; i < b.Length; i++)
             {
                 // assume it's ok
                 isSolutionOk = true;
 
                 for (int j = 0; j < a.Length; j++)
                 {
-                    if (a[j] != b[(i + j) % a.Length])
+                    if (a[j] != b[(i + j) % b.Length])
                     {
-                        i++;
-                        while (i < a.Length && j > 0 && (a[j] != b[(i + j) % a.Length] || a[j - 1] != b[(i + j - 1) % a.Length]))
-                        {
-                            i++;
-                        }
-                        if (i == a.Length)
-                        {
-                            // set it to false when it's not
-                            isSolutionOk = false;
-                            break;
-                        }
-                        else
-                        {
-                            // check again full array
-                            j = 0;
-                        }
+                        //                        i++;
+                        //                        while (i < a.Length && a[j] != b[(i + j) % a.Length])
+                        //                        {
+                        //                            i++;
+                        //                        }
+                        //                        if (i == a.Length)
+                        //                        {
+                        // set it to false when it's not
+                        isSolutionOk = false;
+                        break;
+                        //                        }
+                        //                        else
+                        //                        {
+                        //                            // check again full array
+                        //                            j = 0;
+                        //                        }
                     }
                 }
 
