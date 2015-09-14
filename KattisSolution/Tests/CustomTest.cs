@@ -109,7 +109,7 @@ namespace KattisSolution.Tests
         {
             // Arrange
             int[] data = new[] { 100000, 100000, 100000, 359000, 2000, 90000 };
-            int[] expected = new[] { -100003, 359000, 2000, 90000 };
+            string[] expected = new[] { "100000x3", "359000", "2000", "90000" };
 
             // Act
             var result = Program.Compact(data).ToArray();

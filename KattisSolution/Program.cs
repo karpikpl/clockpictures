@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Text;
 using KattisSolution.IO;
 
 namespace KattisSolution
@@ -53,36 +54,28 @@ namespace KattisSolution
             //            if (DirtyHack(ref a, ref b))
             //                return "impossible";
 
-            a = Compact(a).ToArray();
-            b = Compact(b).ToArray();
+            var aS = Compact(a).ToArray();
+            var bS = Compact(b).ToArray();
+
+
+            if (aS.Length != bS.Length)
+            {
+                return "impossible";
+            }
 
             bool isSolutionOk = false;
 
-            for (int i = 0; i < b.Length; i++)
+            for (int i = 0; i < bS.Length; i++)
             {
                 // assume it's ok
                 isSolutionOk = true;
 
-                for (int j = 0; j < a.Length; j++)
+                for (int j = 0; j < aS.Length; j++)
                 {
-                    if (a[j] != b[(i + j) % b.Length])
+                    if (aS[j] != bS[(i + j) % bS.Length])
                     {
-                        //                        i++;
-                        //                        while (i < a.Length && a[j] != b[(i + j) % a.Length])
-                        //                        {
-                        //                            i++;
-                        //                        }
-                        //                        if (i == a.Length)
-                        //                        {
-                        // set it to false when it's not
                         isSolutionOk = false;
                         break;
-                        //                        }
-                        //                        else
-                        //                        {
-                        //                            // check again full array
-                        //                            j = 0;
-                        //                        }
                     }
                 }
 
@@ -94,7 +87,16 @@ namespace KattisSolution
             return isSolutionOk ? "possible" : "impossible";
         }
 
-        public static IEnumerable<int> Compact(int[] a)
+        public static string SolutionSubstring(ref int[] a, ref int[] b)
+        {
+            var aSb = ArrayToString(a);
+            aSb.Append(aSb);
+            var bSb = ArrayToString(b);
+
+            return aSb.ToString().Contains(bSb.ToString()) ? "possible" : "impossible";
+        }
+
+        public static IEnumerable<string> Compact(int[] a)
         {
             int streak = 0;
             int streakStart = -1;
@@ -134,13 +136,13 @@ namespace KattisSolution
                     if (streak > 0)
                     {
                         // end of streak
-                        yield return -(a[i - 1] + streak);
+                        yield return a[i - 1] + "x" + streak;
                     }
 
                     if (i == 1)
-                        yield return a[i - 1];
+                        yield return a[i - 1].ToString();
 
-                    yield return a[i];
+                    yield return a[i].ToString();
                     streak = 0;
                     streakStart = -1;
                 }
@@ -246,6 +248,18 @@ namespace KattisSolution
                     return false;
             }
             return true;
+        }
+
+        public static StringBuilder ArrayToString(int[] array)
+        {
+            StringBuilder sb = new StringBuilder();
+
+            for (int i = 0; i < array.Length; i++)
+            {
+                sb.Append(array[i]);
+            }
+
+            return sb;
         }
     }
 }
