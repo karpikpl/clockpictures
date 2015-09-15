@@ -24,15 +24,7 @@ namespace KattisSolution
             var writer = new BufferedStdoutWriter(stdout);
 
             var n = scanner.NextInt();
-            var result = SolutionSubstring(n, scanner);
 
-            writer.Write(result);
-            writer.Write("\n");
-            writer.Flush();
-        }
-
-        private static string Solution2(int n, IScanner scanner)
-        {
             var a = new int[n];
             var b = new int[n];
 
@@ -46,9 +38,27 @@ namespace KattisSolution
                 b[i] = scanner.NextInt();
             }
 
+            var result3 = SolutionSubstring(a, b);
+            // var result2 = Solution1(a, b);
+            var result = Solution2(a, b);
+          
+            if (result != result3)
+                throw new AccessViolationException();
+
+
+            writer.Write(result);
+            writer.Write("\n");
+            writer.Flush();
+        }
+
+        private static string Solution2(int[] a, int[] b)
+        {
             // first put hands in order
             a = GetDiffs(a).ToArray();
             b = GetDiffs(b).ToArray();
+
+            if (a.Sum() != 360000 || b.Sum() != 360000)
+                throw new InvalidOperationException();
 
             //            if (DirtyHack(ref a, ref b))
             //                return "impossible";
@@ -56,6 +66,8 @@ namespace KattisSolution
             var aS = Compact(a).ToArray();
             var bS = Compact(b).ToArray();
 
+            Debug.WriteLine("A compacted: " + string.Join(", ", aS));
+            Debug.WriteLine("B compacted: " + string.Join(", ", bS));
 
             if (aS.Length != bS.Length)
             {
@@ -86,28 +98,24 @@ namespace KattisSolution
             return isSolutionOk ? "possible" : "impossible";
         }
 
-        public static string SolutionSubstring(int n, IScanner scanner)
+        public static string SolutionSubstring(int[] a, int[] b)
         {
-            var a = new int[n];
-            var b = new int[n];
-
-            for (var i = 0; i < n; i++)
-            {
-                a[i] = scanner.NextInt();
-            }
-
-            for (var i = 0; i < n; i++)
-            {
-                b[i] = scanner.NextInt();
-            }
+            Debug.WriteLine("A: " + string.Join(", ", a));
+            Debug.WriteLine("B: " + string.Join(", ", b));
 
             // first put hands in order
-            a = GetDiffs(a).ToArray();
-            b = GetDiffs(b).ToArray();
+            var aDiffs = GetDiffs(a);
+            var bDiffs = GetDiffs(b);
 
-            var aSb = ArrayToString(a);
+            Debug.WriteLine("A diffs: " + string.Join(", ", aDiffs));
+            Debug.WriteLine("B diffs: " + string.Join(", ", bDiffs));
+
+            var aSb = ArrayToString(aDiffs);
             aSb.Append(aSb);
-            var bSb = ArrayToString(b);
+            var bSb = ArrayToString(bDiffs);
+
+            Debug.WriteLine("A string: " + aSb);
+            Debug.WriteLine("B string: " + bSb);
 
             return Kmp(aSb.ToString(), bSb.ToString()) >= 0 ? "possible" : "impossible";
         }
@@ -121,29 +129,40 @@ namespace KattisSolution
 
             if (a[0] == a[a.Length - 1])
             {
+                int value = a[0];
+                a[0] = -1;
+                a[a.Length - 1] = -1;
+
                 streak = 2;
-                int top = 0, bottom = 0;
-                while (a[top] == a[top + 1])
+                int index = 1;
+                while (a[index] == value)
                 {
-                    top++;
+                    a[index] = -1;
+                    index++;
                     streak++;
                 }
                 // set the algorithm to skip the begining
-                forwardSearch = top + 1;
+                forwardSearch = index;
 
-                while (a[a.Length - 1 - bottom] == a[a.Length - 1 - bottom - 1])
+                var topIndex = a.Length - 2;
+                while (a[topIndex] == value)
                 {
-                    bottom++;
+                    a[topIndex] = -1;
+                    topIndex--;
                     streak++;
                 }
-                limit = a.Length - bottom - 1;
+                //limit = a.Length - bottom - 1;
+                limit = topIndex + 2;
 
-                yield return a[0] + "x" + streak;
+                yield return value + "x" + streak;
                 streak = -1;
             }
 
             for (int i = forwardSearch; i < limit - 1; i++)
             {
+                if (a[i] == -1)
+                    continue;
+
                 if (a[i] == a[i + 1])
                 {
                     if (streakStart == -1)
@@ -167,7 +186,7 @@ namespace KattisSolution
                         yield return a[i].ToString();
                     }
 
-                    if (i == limit - 2)
+                    if (i == limit - 2 && a[limit - 1] != -1)
                     {
                         yield return a[limit - 1].ToString();
                     }
@@ -225,22 +244,11 @@ namespace KattisSolution
             return a;
         }
 
-        private static string Solution1(int n, IScanner scanner)
+        private static string Solution1(int[] a, int[] b)
         {
             Stopwatch sw = new Stopwatch();
             sw.Start();
-            var a = new int[n];
-            var b = new int[n];
-
-            for (var i = 0; i < n; i++)
-            {
-                a[i] = scanner.NextInt();
-            }
-
-            for (var i = 0; i < n; i++)
-            {
-                b[i] = scanner.NextInt();
-            }
+            int n = a.Length;
 
             // first put hands in order
             a = a.OrderBy(v => v).ToArray();
@@ -281,20 +289,22 @@ namespace KattisSolution
             return true;
         }
 
-        public static StringBuilder ArrayToString(int[] array)
+        public static StringBuilder ArrayToString(IEnumerable<int> array)
         {
-            StringBuilder sb = new StringBuilder();
+            var sb = new StringBuilder();
 
-            for (int i = 0; i < array.Length; i++)
-            {
-                sb.Append(array[i]);
-            }
+            array.ToList().ForEach(a => sb.Append(a));
 
             return sb;
         }
 
         public static int Kmp(string text, string searchString)
         {
+            if (text.Length == searchString.Length)
+            {
+                return text == searchString ? 0 : -1;
+            }
+
             int m = 0;
             int i = 0;
             int[] T = new int[text.Length];
