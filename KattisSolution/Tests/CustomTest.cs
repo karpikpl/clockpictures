@@ -117,5 +117,47 @@ namespace KattisSolution.Tests
             // Assert
             CollectionAssert.AreEqual(expected, result);
         }
+
+        [Test]
+        public void Compact_Should_CompactArray2()
+        {
+            // Arrange
+            int[] data = new[] { 100000, 100000, 100000, 359000, 2000, 90000, 100000, 100000 };
+            string[] expected = new[] { "100000x5", "359000", "2000", "90000" };
+
+            // Act
+            var result = Program.Compact(data).ToArray();
+
+            // Assert
+            CollectionAssert.AreEqual(expected, result);
+        }
+
+        [Test]
+        public void Compact_Should_CompactArray3()
+        {
+            // Arrange
+            int[] data = new[] { 100000, 359000, 2000, 90000, 100000 };
+            string[] expected = new[] { "100000x2", "359000", "2000", "90000" };
+
+            // Act
+            var result = Program.Compact(data).ToArray();
+
+            // Assert
+            CollectionAssert.AreEqual(expected, result);
+        }
+
+        [Test]
+        public void Compact_Should_CompactArray4()
+        {
+            // Arrange
+            int[] data = new[] { 123, 123, 359000, 2000, 0, 0, 0, 90000, 456, 456 };
+            string[] expected = new[] { "123x2", "359000", "2000", "0x3", "90000", "456x2" };
+
+            // Act
+            var result = Program.Compact(data).ToArray();
+
+            // Assert
+            CollectionAssert.AreEqual(expected, result);
+        }
     }
 }

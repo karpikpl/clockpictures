@@ -24,7 +24,7 @@ namespace KattisSolution
             var writer = new BufferedStdoutWriter(stdout);
 
             var n = scanner.NextInt();
-            var result = Solution2(n, scanner);
+            var result = SolutionSubstring(n, scanner);
 
 
             writer.Write(result);
@@ -87,13 +87,30 @@ namespace KattisSolution
             return isSolutionOk ? "possible" : "impossible";
         }
 
-        public static string SolutionSubstring(ref int[] a, ref int[] b)
+        public static string SolutionSubstring(int n, IScanner scanner)
         {
+            var a = new int[n];
+            var b = new int[n];
+
+            for (var i = 0; i < n; i++)
+            {
+                a[i] = scanner.NextInt();
+            }
+
+            for (var i = 0; i < n; i++)
+            {
+                b[i] = scanner.NextInt();
+            }
+
+            // first put hands in order
+            a = GetDiffs(a).ToArray();
+            b = GetDiffs(b).ToArray();
+
             var aSb = ArrayToString(a);
             aSb.Append(aSb);
             var bSb = ArrayToString(b);
 
-            return aSb.ToString().Contains(bSb.ToString()) ? "possible" : "impossible";
+            return Kmp(aSb.ToString(), bSb.ToString()) >= 0 ? "possible" : "impossible";
         }
 
         public static IEnumerable<string> Compact(int[] a)
@@ -101,33 +118,39 @@ namespace KattisSolution
             int streak = 0;
             int streakStart = -1;
             int limit = a.Length;
+            int forwardSearch = 0;
 
-            for (int i = 1; i < limit; i++)
+            if (a[0] == a[a.Length - 1])
             {
-                if (a[i] == a[i - 1])
+                streak = 2;
+                int top = 0, bottom = 0;
+                while (a[top] == a[top + 1])
+                {
+                    top++;
+                    streak++;
+                }
+                // set the algorithm to skip the begining
+                forwardSearch = top + 1;
+
+                while (a[a.Length - 1 - bottom] == a[a.Length - 1 - bottom - 1])
+                {
+                    bottom++;
+                    streak++;
+                }
+                limit = a.Length - bottom - 1;
+
+                yield return a[0] + "x" + streak;
+                streak = -1;
+            }
+
+            for (int i = forwardSearch; i < limit - 1; i++)
+            {
+                if (a[i] == a[i + 1])
                 {
                     if (streakStart == -1)
                     {
-                        streakStart = i - 1;
+                        streakStart = i;
                         streak++;
-
-                        // only for the begining
-                        if (i == 1)
-                        {
-                            // go backwards to check
-                            for (int j = a.Length - 1; j > 1; j--)
-                            {
-                                if (a[i] == a[j])
-                                {
-                                    streak++;
-                                    limit--;
-                                }
-                                else
-                                {
-                                    break;
-                                }
-                            }
-                        }
                     }
                     streak++;
                 }
@@ -137,15 +160,24 @@ namespace KattisSolution
                     {
                         // end of streak
                         yield return a[i - 1] + "x" + streak;
+                        streak = 0;
+                        streakStart = -1;
+                    }
+                    else
+                    {
+                        yield return a[i].ToString();
                     }
 
-                    if (i == 1)
-                        yield return a[i - 1].ToString();
-
-                    yield return a[i].ToString();
-                    streak = 0;
-                    streakStart = -1;
+                    if (i == limit - 2)
+                    {
+                        yield return a[limit - 1].ToString();
+                    }
                 }
+            }
+
+            if (streak > 0)
+            {
+                yield return a[limit - 1] + "x" + streak;
             }
         }
 
@@ -260,6 +292,67 @@ namespace KattisSolution
             }
 
             return sb;
+        }
+
+        public static int Kmp(string text, string searchString)
+        {
+            int m = 0;
+            int i = 0;
+            int[] T = new int[text.Length];
+
+            KmpTable(text, T);
+
+            while (m + i < text.Length)
+            {
+                if (searchString[i] == text[m + i])
+                {
+                    if (i == searchString.Length - 1)
+                        return m;
+                    i++;
+                }
+                else
+                {
+                    if (T[i] > -1)
+                    {
+                        m = m + i - T[i];
+                        i = T[i];
+                    }
+                    else
+                    {
+                        i = 0;
+                        m++;
+                    }
+                }
+            }
+            return -1;
+        }
+
+        private static void KmpTable(string w, int[] T)
+        {
+            int pos = 2;
+            int cnd = 0;
+
+            T[0] = -1;
+            T[1] = 0;
+
+            while (pos < w.Length)
+            {
+                if (w[pos - 1] == w[cnd])
+                {
+                    cnd++;
+                    T[pos] = cnd;
+                    pos++;
+                }
+                else if (cnd > 0)
+                {
+                    cnd = T[cnd];
+                }
+                else
+                {
+                    T[pos] = 0;
+                    pos++;
+                }
+            }
         }
     }
 }
