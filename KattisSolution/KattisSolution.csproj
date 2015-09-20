@@ -65,12 +65,13 @@
     <Compile Include="Helpers.Tests\TestCaseFinderTests.cs" />
     <Compile Include="InputOutput.cs" />
     <Compile Include="Helpers\TestCaseFinder.cs" />
+    <Compile Include="NewSolution.cs" />
     <Compile Include="Tests\CustomTest.cs" />
+    <Compile Include="Tests\ExtraTests.cs" />
     <Compile Include="Tests\FileInputTest.cs" />
     <Compile Include="Helpers.Tests\OptimizedPositiveIntReaderTests.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Tests\KMPTests.cs" />
     <Compile Include="Tests\ProgramBasicTest.cs" />
   </ItemGroup>
   <ItemGroup>
